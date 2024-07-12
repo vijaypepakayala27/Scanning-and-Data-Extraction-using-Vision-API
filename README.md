@@ -3,14 +3,14 @@
 
 This project utilizes the Google Cloud Vision API to scan PDF and JPG documents, such as birth certificates, resumes, and invoices, for extracting text and creating a data model for further analysis. It supports bulk processing of multiple documents or images and visualization of the extracted data.
 
-##To accomplish the task of scanning a PDF or JPG file using Google or OpenAI APIs and creating a model to demonstrate the data extracted, we'll follow these steps:
+## To accomplish the task of scanning a PDF or JPG file using Google or OpenAI APIs and creating a model to demonstrate the data extracted, we'll follow these steps:
 
-  Set Up the Environment: Install necessary libraries and set up API keys.
-  Document Scanning: Use an OCR (Optical Character Recognition) API to extract text from the documents.
-  Data Extraction: Process the extracted text to identify and extract relevant information.
-  Create a Data Model: Structure the extracted data into a usable format.
-  Bulk Processing: Automate the process for multiple documents.
-  Visualize the Data: Present the data in a comprehensible format.
+  **Set Up the Environment: Install necessary libraries and set up API keys.
+  **Document Scanning: Use an OCR (Optical Character Recognition) API to extract text from the documents.
+  **Data Extraction: Process the extracted text to identify and extract relevant information.
+  **Create a Data Model: Structure the extracted data into a usable format.
+  **Bulk Processing: Automate the process for multiple documents.
+  **Visualize the Data: Present the data in a comprehensible format.
 
 ## Features
 
