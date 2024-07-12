@@ -1,22 +1,35 @@
+
 # Document Scanner and Data Extractor
 
-This project uses Google Cloud Vision API to scan PDF and JPG documents (e.g., birth certificates, resumes, invoices) to extract text and create a data model for further analysis. It also includes bulk processing for multiple documents and visualization of the extracted data.
+This project utilizes the Google Cloud Vision API to scan PDF and JPG documents, such as birth certificates, resumes, and invoices, for extracting text and creating a data model for further analysis. It supports bulk processing of multiple documents or images and visualization of the extracted data.
+
+## Features
+
+- **Document Types**: Supports PDF and JPG document formats.
+- **Text Extraction**: Extracts text content from documents using Google Cloud Vision API.
+- **Data Modeling**: Creates a structured data model from extracted text for analysis.
+- **Bulk Processing**: Handles multiple documents or images in a batch processing mode.
+- **Data Visualization**: Provides visualization tools to explore and analyze extracted data.
 
 ## Prerequisites
 
+Before starting, ensure you have the following installed and set up on your system:
+
 - Python 3.6 or higher
 - Google Cloud account with Vision API enabled
-- Poppler for Windows (for PDF to image conversion)
-- Required Python libraries
+- Poppler for Windows (required for PDF to image conversion)
+- Required Python libraries (installed via pip)
 
 ## Setup Instructions
+
+Follow these steps to set up and configure the project:
 
 ### Step 1: Install Necessary Libraries
 
 Install the required Python libraries using pip:
 
 ```bash
-pip install google-cloud-vision pandas pdf2image Pillow
+pip install google-cloud-vision pandas pdf2image Pillow matplotlib
 ```
 
 ### Step 2: Set Up Google Cloud Vision
@@ -29,8 +42,10 @@ pip install google-cloud-vision pandas pdf2image Pillow
 
 ### Step 3: Install Poppler
 
+Poppler is required for converting PDFs to images on Windows:
+
 1. Download Poppler for Windows from [Poppler for Windows](http://blog.alivate.com.au/poppler-windows/).
-2. Extract the contents of the downloaded ZIP file to a location on your computer (e.g., `C:\poppler-xx_xx`).
+2. Extract the contents to a directory (e.g., `C:\poppler-xx_xx`).
 3. Add the path to the `bin` directory of the Poppler installation to your system's PATH environment variable.
 
 ### Step 4: Verify Poppler Installation
@@ -43,113 +58,64 @@ pdfinfo -v
 
 You should see version information for Poppler if it is correctly installed.
 
-### Step 5: Set Up the Python Script
+### Step 5: Set Up and Run the Python Script
 
-Create a Python script (e.g., `document_scanner.py`) with the following content:
+Choose the appropriate script based on your document types:
+
+#### For Processing PDF Files:
+
+Ensure you have the script `process_pdf_documents.py` and execute it:
 
 ```python
-import os
+# Example usage to process PDF documents
+import process_pdf_documents
 
-# Set the environment variable to point to your service account key JSON file
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "C:/path/to/your/service-account-file.json"
+# Path to the folder containing PDF documents
+folder_path = "path/to/your/pdf_folder"
 
-from google.cloud import vision
-import io
-from pdf2image import convert_from_path
-from PIL import Image
-import re
-import pandas as pd
-import glob
-import matplotlib.pyplot as plt
+# Process the PDF documents and create a DataFrame
+df = process_pdf_documents.process_pdf_documents(folder_path)
 
-# Function to extract text from an image file using Google Cloud Vision API
-def extract_text_from_image(image_path):
-    client = vision.ImageAnnotatorClient()  # Initialize the Vision API client
+# Print the DataFrame
+print(df)
 
-    # Read the image file
-    with io.open(image_path, 'rb') as image_file:
-        content = image_file.read()
-
-    image = vision.Image(content=content)  # Prepare the image for the API
-    response = client.text_detection(image=image)  # Perform text detection
-    texts = response.text_annotations  # Get the detected texts
-
-    # Check for any errors
-    if response.error.message:
-        raise Exception(f'{response.error.message}')
-
-    # Return the detected text
-    return texts[0].description if texts else ""
-
-# Function to convert a PDF file to images
-def convert_pdf_to_images(pdf_path):
-    return convert_from_path(pdf_path)  # Convert each page of the PDF to an image
-
-# Function to extract text from a PDF file by converting it to images first
-def extract_text_from_pdf(pdf_path):
-    images = convert_pdf_to_images(pdf_path)  # Convert PDF to images
-    text = ""
-    for image in images:
-        image_path = "temp_image.jpg"
-        image.save(image_path, 'JPEG')  # Save the image temporarily
-        text += extract_text_from_image(image_path)  # Extract text from the image
-        os.remove(image_path)  # Remove the temporary image file
-    return text
-
-# Function to extract specific data from the text of a birth certificate
-def extract_birth_certificate_data(text):
-    data = {}
-    data['Name'] = re.search(r"Name:\s*(.*)", text).group(1).strip() if re.search(r"Name:\s*(.*)", text) else ""
-    data['Date of Birth'] = re.search(r"Date of Birth:\s*(.*)", text).group(1).strip() if re.search(r"Date of Birth:\s*(.*)", text) else ""
-    data['Place of Birth'] = re.search(r"Place of Birth:\s*(.*)", text).group(1).strip() if re.search(r"Place of Birth:\s*(.*)", text) else ""
-    return data
-
-# Function to create a Pandas DataFrame from a list of data dictionaries
-def create_data_model(data_list):
-    df = pd.DataFrame(data_list)  # Create a DataFrame from the list of data
-    return df
-
-# Function to process multiple documents in a folder and extract data from each
-def process_documents(folder_path):
-    data_list = []
-    # Iterate over all PDF and JPG files in the folder
-    for file_path in glob.glob(folder_path + "/*.pdf") + glob.glob(folder_path + "/*.jpg"):
-        if file_path.endswith('.pdf'):
-            text = extract_text_from_pdf(file_path)  # Extract text from PDF
-        else:
-            text = extract_text_from_image(file_path)  # Extract text from JPG
-        
-        data = extract_birth_certificate_data(text)  # Extract relevant data
-        data_list.append(data)  # Add the extracted data to the list
-    
-    df = create_data_model(data_list)  # Create a DataFrame from the data list
-    return df
-
-# Function to visualize the extracted data using a bar chart
-def visualize_data(df):
-    df['Date of Birth'] = pd.to_datetime(df['Date of Birth'])  # Convert date strings to datetime objects
-    df['Year of Birth'] = df['Date of Birth'].dt.year  # Extract the year from the date
-
-    plt.figure(figsize=(10, 6))
-    df['Year of Birth'].value_counts().sort_index().plot(kind='bar')  # Create a bar chart
-    plt.title('Births per Year')
-    plt.xlabel('Year')
-    plt.ylabel('Number of Births')
-    plt.show()
-
-# Example usage
-folder_path = "documents"  # Path to the folder containing documents
-df = process_documents(folder_path)  # Process the documents and create a DataFrame
-print(df)  # Print the DataFrame
-visualize_data(df)  # Visualize the data
+# Visualize the data
+process_pdf_documents.visualize_data(df)
 ```
 
-### Step 6: Run the Script
+#### For Processing JPG Files:
 
-Run the script using Python:
+Ensure you have the script `process_jpg_documents.py` and execute it:
+
+```python
+# Example usage to process JPG documents
+import process_jpg_documents
+
+# Path to the folder containing JPG documents
+folder_path = "path/to/your/jpg_folder"
+
+# Process the JPG documents and create a DataFrame
+df = process_jpg_documents.process_jpg_documents(folder_path)
+
+# Print the DataFrame
+print(df)
+
+# Visualize the data
+process_jpg_documents.visualize_data(df)
+```
+
+### Step 6: Running the Script
+
+Run the chosen script using Python:
 
 ```bash
-python document_scanner.py
+python process_pdf_documents.py
 ```
 
-Replace `"C:/path/to/your/service-account-file.json"` and `"documents"` with the actual paths in your environment. This script will process all PDF and JPG files in the specified folder, extract relevant data, and visualize it.
+or
+
+```bash
+python process_jpg_documents.py
+```
+
+Replace `"C:/path/to/your/service-account-file.json"` with the actual path to your Google Cloud service account JSON key file. This script will process all PDF and JPG files in the specified folder, extract relevant data, and visualize it.
