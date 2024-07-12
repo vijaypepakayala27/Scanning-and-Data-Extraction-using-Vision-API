@@ -64,7 +64,7 @@ Choose the appropriate script based on your document types:
 
 #### For Processing PDF Files:
 
-Ensure you have the script `process_pdf_documents.py` and execute it:
+Ensure you have the script `Scan_PDF.py` and execute it:
 
 ```python
 # Example usage to process PDF documents
@@ -85,7 +85,7 @@ process_pdf_documents.visualize_data(df)
 
 #### For Processing JPG Files:
 
-Ensure you have the script `process_jpg_documents.py` and execute it:
+Ensure you have the script `Scan_Image.py` and execute it:
 
 ```python
 # Example usage to process JPG documents
@@ -109,13 +109,13 @@ process_jpg_documents.visualize_data(df)
 Run the chosen script using Python:
 
 ```bash
-python process_pdf_documents.py
+python Scan_PDF.py
 ```
 
 or
 
 ```bash
-python process_jpg_documents.py
+python Scan_Image.py
 ```
 
 Replace `"C:/path/to/your/service-account-file.json"` with the actual path to your Google Cloud service account JSON key file. This script will process all PDF and JPG files in the specified folder, extract relevant data, and visualize it.
